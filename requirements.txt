@@ -1,0 +1,9 @@
+fastapi
+pandas
+scikit-learn
+numpy
+requests
+google-generativeai  # Include the correct version if specified0.15
+uvicorn
+pymupdf
+python-multipart
