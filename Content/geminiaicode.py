@@ -15,7 +15,7 @@ app = FastAPI()
 @app.get("/")
 def index():
     return {"message": "Hello User"}
-genai.configure(api_key="AIzaSyDRqDV4l7aMgzjSNIq9Yrivi2jPXIj4iSg")
+genai.configure(api_key="Your API Key")
 
 @app.post('/login')
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -52,7 +52,7 @@ async def get_gemini_ai_output( file: UploadFile):
 async def resume(position:str=Query(...) , file: UploadFile = File(...),current_user: schemas.User = Depends(oauth2.get_current_user)):
     try:
         details = await get_gemini_ai_output(file)
-        genai.configure(api_key="AIzaSyDRqDV4l7aMgzjSNIq9Yrivi2jPXIj4iSg")
+        genai.configure(api_key="Your API Key")
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(f"Resume: {details['text']} based on this resume,find everything in the resume and based on this you analyse and give your coments on this resume as a Hiring Manager of a big company and after anysing this resume you have to give a verdict that for the {position} position this resume is selected or rejected so putput should be strictly in format MY COMMENTS: and then your comments and then VERDICT: and then your verdict and cant you give ans in a format where there can't be any /n ir something like that so that i can give it as my api response please seperate the verdict and if possible return answer in json format")
         return response.text
