@@ -2,14 +2,34 @@ import io
 import json
 import requests  # Import the requests library
 import os
+from fastapi.security import OAuth2PasswordRequestForm
+from Content import schemas,models,database,hashing, token, oauth2
+from sqlalchemy.orm import Session 
 import google.generativeai as genai
-from fastapi import Depends, FastAPI, HTTPException,Query, UploadFile, File
+from fastapi import Depends, FastAPI, HTTPException,Query, UploadFile, File,status
 
+get_db = database.get_db
 
 app = FastAPI()
 
-
+@app.get("/")
+def index():
+    return {"message": "Hello User"}
 genai.configure(api_key="AIzaSyDRqDV4l7aMgzjSNIq9Yrivi2jPXIj4iSg")
+
+@app.post('/login')
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Credentials")
+    
+    if not hashing.Hash.verify(user.password, form_data.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
+
+    access_token = token.create_access_token(data={"sub": user.email})
+    
+    return {"access_token": access_token, "token_type": "bearer"}
 
 async def get_gemini_ai_output( file: UploadFile):
     base_url = "http://localhost:8001"
@@ -29,7 +49,7 @@ async def get_gemini_ai_output( file: UploadFile):
         raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
 
 @app.post("/Resume_Analysis")
-async def resume(position:str=Query(...) , file: UploadFile = File(...)):
+async def resume(position:str=Query(...) , file: UploadFile = File(...),current_user: schemas.User = Depends(oauth2.get_current_user)):
     try:
         details = await get_gemini_ai_output(file)
         genai.configure(api_key="AIzaSyDRqDV4l7aMgzjSNIq9Yrivi2jPXIj4iSg")
