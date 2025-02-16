@@ -156,11 +156,15 @@ git commit -m "Added feature XYZ"
 Push your branch to GitHub:
 
 git push origin feature-branch
+
 Open a Pull Request for review.
 
 👤 Contact
+
 Siddharth Pandey
+
 📧 siddharthpandeyofficial@gmail.com
+
 📍 IIIT Naya Raipur
 
 📜 License
